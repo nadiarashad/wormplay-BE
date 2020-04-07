@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
 
-const getApiAndEmit = async (socket) => {
+const getApiAndEmit = (socket) => {
   try {
     const res = { data: "test" };
     socket.emit("FromAPI", res.data); // Emitting a new message. It will be consumed by the client
