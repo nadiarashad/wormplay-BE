@@ -34,9 +34,7 @@ server.listen(port, () => console.log(`Listening on port ${port}`));
 
 const getApiAndEmit = async (socket) => {
   try {
-    const res = await axios.get(
-      "http://api.weatherapi.com/v1/current.json?key=0923d95ae0ed4df3a7190232200604&q=Manchester"
-    );
+    const res = { data: "test" };
     socket.emit("FromAPI", res.data); // Emitting a new message. It will be consumed by the client
   } catch (error) {
     console.error(`Error: ${error.code}`);
