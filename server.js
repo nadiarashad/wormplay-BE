@@ -15,19 +15,40 @@ const io = socketIo(server);
 
 // Variables for storing clients in game and in lobby
 let stringToBroadcast = "this";
-const playersInGame = ["", ""];
+const playersInGame = {
+  p1: { username: null, id: null },
+  p2: { username: null, id: null },
+};
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
 
 io.on("connection", function (socket) {
   console.log("New client connected");
-  // console.log(socket, "socket");
 
   io.emit("news", { hello: stringToBroadcast });
 
-  socket.on("my other event", function (data) {
-    stringToBroadcast = data.my;
-    socket.broadcast.emit("server update", { hello: stringToBroadcast });
+  socket.on("login", function (data) {
+    const newPlayer = {};
+    newPlayer.id = socket.id;
+    newPlayer.username = data.username;
+
+    if (!playersInGame.p1.id) {
+      playersInGame.p1 = newPlayer;
+      io.to(socket.id).emit("loginConf", {
+        youCanEnter: true,
+        playersDetails: playersInGame,
+      });
+    } else if (!playersInGame.p2.id) {
+      playersInGame.p2 = newPlayer;
+      io.to(socket.id).emit("loginConf", {
+        youCanEnter: true,
+        playersDetails: playersInGame,
+      });
+    } else {
+      io.to(socket.id).emit("loginConf", {
+        youCanEnter: false,
+      });
+    }
   });
 
   socket.on("p1ArrayUpdate", function (data) {
@@ -42,33 +63,19 @@ io.on("connection", function (socket) {
     socket.broadcast.emit("updatedP2Chars", { p2Chars: arrayToBroadcast });
   });
 
-  const newPlayer = {};
-  newPlayer.id = socket.id; // also data.id the same
-  newPlayer.handle = "";
-
-  if (playersInGame[0] === "") {
-    playersInGame[0] = newPlayer;
-    console.log(playersInGame, "added player1");
-    io.to(socket.id).emit("player1", {
-      p1: true,
-    });
-  } else if (playersInGame[1] === "") {
-    playersInGame[1] = newPlayer;
-    console.log(playersInGame, "added player2");
-    io.to(socket.id).emit("player2", {
-      p2: true,
-    });
-  } else {
-    io.to(socket.id).emit("sendMsg", {});
-  }
-
   socket.on("disconnect", () => {
-    if (socket.id === playersInGame[0].id) {
-      playersInGame[0] = "";
-    } else if (socket.id === playersInGame[1].id) {
-      playersInGame[1] = "";
+    if (socket.id === playersInGame.p1.id) {
+      io.emit("player left", {
+        leavingPlayerID: playersInGame.p1.id,
+        leavingPlayerUsername: playersInGame.p1.username,
+      });
+      playersInGame.p1 = { username: null, id: null };
+    } else if (socket.id === playersInGame.p2.id) {
+      io.emit("player left", {
+        leavingPlayerID: playersInGame.p2.id,
+        leavingPlayerUsername: playersInGame.p2.username,
+      });
+      playersInGame.p2 = { username: null, id: null };
     }
-    console.log("Client disconnected");
-    console.log(playersInGame);
   });
 });
