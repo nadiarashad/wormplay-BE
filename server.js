@@ -55,6 +55,11 @@ io.on("connection", function (socket) {
     }
   });
 
+  socket.on("worm word submitted", function (wormWord) {
+    console.log("Worm Word Received:", wormWord);
+    // Send to dictionary API - if not real word NO POINTS if real word POINTS = wormWord.length;
+  });
+
   socket.on("disconnect", () => {
     console.log(`Disconnection of ${socket.id}`);
 
