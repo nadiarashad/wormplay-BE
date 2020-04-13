@@ -70,16 +70,4 @@ io.on("connection", function (socket) {
       }
     });
   });
-  //THIS WAS FROM MOCK GAME.
-  // socket.on("p1ArrayUpdate", function (data) {
-  //   console.log("updating p1array");
-  //   arrayToBroadcast = data.p1Chars;
-  //   socket.broadcast.emit("updatedP1Chars", { p1Chars: arrayToBroadcast });
-  // });
-
-  // socket.on("p2ArrayUpdate", function (data) {
-  //   console.log("updating p2array");
-  //   arrayToBroadcast = data.p2Chars;
-  //   socket.broadcast.emit("updatedP2Chars", { p2Chars: arrayToBroadcast });
-  // });
 });
