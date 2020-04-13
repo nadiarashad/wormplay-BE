@@ -2,6 +2,7 @@ const express = require("express");
 
 const http = require("http");
 const socketIo = require("socket.io");
+const { validateWord } = require("./utils/utils");
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
@@ -53,6 +54,43 @@ io.on("connection", function (socket) {
         youCanEnter: false,
       });
     }
+  });
+
+  socket.on("worm word submitted", function (wormWord) {
+    console.log("Worm Word Received:", wormWord);
+    validateWord(wormWord)
+      .then((res) => {
+        io.to(socket.id).emit("word checked", {
+          word: wormWord,
+          isValid: true,
+          points: wormWord.length,
+        });
+        socket.broadcast.emit("opponent score", {
+          word: wormWord,
+          isValid: true,
+          opponentPoints: wormWord.length,
+        });
+      })
+      .catch((error) => {
+        if (error.response.status === 404) {
+          io.to(socket.id).emit("word checked", {
+            word: wormWord,
+            isValid: false,
+            points: 0,
+          });
+          socket.broadcast.emit("opponent score", {
+            word: wormWord,
+            isValid: false,
+            opponentPoints: 0,
+          });
+        } else {
+          io.to(socket.id).emit("api error", {
+            status: error.response.status,
+            message: error.response.statusText,
+          });
+        }
+      });
+    // Some p1 points vs p2 points to show who wins?? (probably separate function/event)
   });
 
   socket.on("disconnect", () => {
