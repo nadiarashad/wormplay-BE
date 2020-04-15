@@ -23,8 +23,22 @@ const playersInGame = {
 const labelArray = ["p1", "p2"];
 server.listen(port, () => console.log(`Listening on port ${port}`));
 
+let roomno = 1;
+
 io.on("connection", function (socket) {
   console.log(`Connection of ${socket.id}`);
+
+  if (
+    io.nsps["/"].adapter.rooms["room-" + roomno] &&
+    io.nsps["/"].adapter.rooms["room-" + roomno].length > 1
+  )
+    roomno++;
+  socket.join("room-" + roomno);
+
+  //Send this event to everyone in the room.
+  io.sockets
+    .in("room-" + roomno)
+    .emit("connectToRoom", "You are in room no. " + roomno);
 
   socket.on("login", function (data) {
     console.log(`${data.username} is loggin in. Their socket is ${socket.id}`);
