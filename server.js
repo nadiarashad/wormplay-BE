@@ -100,9 +100,14 @@ io.on("connection", function (socket) {
       roomSheWantsToJoin.p2 = player;
     }
 
-    console.log(roomSheWantsToJoin, 'room she has joined')
+    console.log(roomSheWantsToJoin, "room she has joined");
 
     //************** HAVE PLAYER JOIN ROOM */
+
+    //sends client which room she has joined
+    socket.emit("roomJoined", {
+      roomId: roomSheWantsToJoin.id,
+    });
 
     // function enterGame(player) {
     //   playersInGame[player] = newPlayer;
