@@ -19,134 +19,75 @@ const server = http.createServer(app);
 
 const io = socketIo(server);
 
-// Variables for storing clients in game and in lobby
-
-// const playersInGame = {
-//   p1: { username: null, id: null },
-//   p2: { username: null, id: null },
-// };
 const labelArray = ["p1", "p2"];
 server.listen(port, () => console.log(`Listening on port ${port}`));
 
-// let roomno = 1;
-
-// const hotel = {
-//   1: {},
-//   2: {},
-//   3: {},
-// };
-
 io.on("connection", function (socket) {
   console.log(
-    `Connection of ${socket.id} but nothing should happen yet. They just opened a browser.`
+    `>>>connection ${socket.id}`
   );
 
   socket.on("login", function (loginData) {
+    console.log(">>>login")
     let lobbyData = {};
-    // data.username = username;
-    // data.id = socket.id;
-
-    // add room info to message
-    addRoomsToData(lobbyData);
-
-    // send message to user
-    socket.emit("connectionReply", lobbyData);
+    addRoomsToData(lobbyData);  // add room info to message
+    socket.emit("connectionReply", lobbyData);  // send message to user
 
     const newPlayer = {};
     newPlayer.id = socket.id;
     newPlayer.username = loginData.username;
-
     players.push(newPlayer);
-
-    console.log("New! " + newPlayer);
-    console.log("All: " + players);
   });
 
   socket.on("joinRoom", function (data) {
-    //{roomID: 0, username: ""}
+    console.log(">>>joinRoom")
+    let roomID = data.roomID;
 
     //HERE'S WHAT A ROOM LOOKS LIKE:
     // room = {
-    //   id: uuid.v4(), //possible screw point
+    //   roomID: uuid.v4(), //possible screw point
     //   p1: { username: null, id: null },
     //   p2: { username: null, id: null },
     // };
 
-    //Player who wants to join room: socket.id
-    //Room she wants to join:        data.roomID
+    
+    let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
 
-    // find the room being requested
-    let roomSheWantsToJoin = _.find(rooms, { id: data.roomID });
-
-    //Now 'roomSheWantsToJoin' now IS room qE2 from the rooms array.
-
-    // verify that player can join room:
-    // room must exist and have less than 4 players
     if (
       !roomSheWantsToJoin ||
       (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id)
     ) {
-      // send refusal
       socket.emit("connectionRefused");
       return;
     }
 
-    //Yes, player can enter that room she wants.
+    //Otherwise, yes, player can enter that room she wants.
     let player = _.find(players, { id: socket.id });
 
-    if (roomSheWantsToJoin.p1.username === null) {
+    if (roomSheWantsToJoin.p1.id === null) {
       roomSheWantsToJoin.p1 = player;
     } else {
       roomSheWantsToJoin.p2 = player;
     }
 
-    console.log(roomSheWantsToJoin, "room she has joined");
+    socket.join(roomID);
 
-    //************** HAVE PLAYER JOIN ROOM */
-
-    //sends client which room she has joined
-    socket.emit("roomJoined", {
-      roomId: roomSheWantsToJoin.id,
+    socket.broadcast.emit("a player entered the game", {
+      room: roomSheWantsToJoin,
+      playersDetails: {p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2}
+      enteringPlayerID: socket.id,
+      enteringPlayerUsername: player.username,
     });
 
-    // function enterGame(player) {
-    //   playersInGame[player] = newPlayer;
-    //   io.to(socket.id).emit("loginConf", {
-    //     youCanEnter: true,
-    //     playersDetails: playersInGame,
-    //   });
-    //   socket.broadcast.emit("a player entered the game", {
-    //     playersDetails: playersInGame,
-    //     enteringPlayerID: socket.id,
-    //     enteringPlayerUsername: playersInGame[player].username,
-    //   });
-    // }
-
-    // if (!playersInGame.p1.id) {
-    //   enterGame("p1");
-    // } else if (!playersInGame.p2.id) {
-    //   enterGame("p2");
-    // } else {
-    //   io.to(socket.id).emit("loginConf", {
-    //     youCanEnter: false,
-    //   });
-    // }
-
-    //************************** */
-
-    // register player with room
-    room.playerIds.push(socket.id);
-    socket.join(room.id);
-
-    // send verification that room was joined to the player with room id
-    socket.emit("roomJoined", {
-      roomId: room.id,
-      shouldGenerateFirstCake: shouldGenerateFirstCake,
-    });
+      io.to(socket.id).emit("youJoinedARoom", {
+        youCanEnter: true,
+        playersDetails: {p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2},
+        room: roomSheWantsToJoin,
+      });
   });
 
   socket.on("worm word submitted", function (wormWord) {
-    console.log("Worm Word Received:", wormWord);
+    console.log("Worm Word Received: ", wormWord);
     validateWord(wormWord)
       .then((res) => {
         io.to(socket.id).emit("word checked", {
@@ -183,38 +124,62 @@ io.on("connection", function (socket) {
   });
 
   socket.on("disconnect", () => {
-    console.log(`Disconnection of ${socket.id}`);
-
-    // labelArray.forEach((player) => {
-    //   if (socket.id === playersInGame[player].id) {
-    //     const leavingPlayerUsername = playersInGame[player].username;
-    //     playersInGame[player] = { username: null, id: null };
-    //     socket.broadcast.emit("a player left the game", {
-    //       playersDetails: playersInGame,
-    //       leavingPlayerID: socket.id,
-    //       leavingPlayerUsername,
-    //     });
-    //   }
-    // });
-
-    // socket.on("disconnect", function () {
-    //   // find the room being left
-    //   var roomToLeave = _.find(rooms, function (room) {
-    //     return _.any(room.playerIds, function (id) {
-    //       // capture socket id in closure scope
-    //       return id == socket.id;
-    //     });
-    //   });
-    //   // handle the rest of the disconnection
-    //   leaveRoom(roomToLeave, socket);
-    // });
+    console.log(`>>>disconnect ${socket.id}`);
+    makePlayerLeaveRoom(socket)
   });
+
+  socket.on("quitRoom", () => {
+    console.log(`>>>quitRoom ${socket.id}`);
+    makePlayerLeaveRoom(socket)
+  });
+
+  socket.on("clientSentChat", function (data) {
+    console.log(">>>clientSentChat")
+    socket.broadcast.to(data.roomID).emit("serverSentChat", data);
+  });
+
 });
 
-//possible screw up should these be higher up??
+//possible screw point should all these fxn declarations these be higher up??
+
+function makePlayerLeaveRoom(socket){
+  console.log("FXN: makePlayerLeaveRoom")
+  let roomToLeave = _.find(rooms, function (room) {
+    return _.any(room.playerIds, function (id) {
+      // capture socket id in closure scope
+      return id == socket.id;
+    });
+  });
+
+  let roomToLeaveArray = rooms.filter(room => room.p1.id === socket.id || room.p2.id === socket.id)
+  let roomToLeave;
+
+  if (roomToLeaveArray.length !== 1){
+    console.log("A strange error where a player is disconnected from a room that the rooms array in BE doesn't think they're in, or there are multiple such rooms.")
+  } else
+  {roomToLeave = roomToLeaveArray[0]
+
+
+    let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2"
+    room[playerLabel].id = { username: null, id: null };
+    
+    socket.broadcast.to(roomToLeave.roomID).emit("a player left the game", {
+        playersDetails: {p1: roomToLeave.p1, p2: roomToLeave.p2},
+        leavingPlayerID: socket.id,
+        leavingPlayerUsername: roomToLeave[playerLabel].username});
+  
+      // if the room is now empty, remove it from the room list
+      if (!roomToLeave.p1.id && !roomToLeave.p2.id){
+        rooms = _.filter(rooms, function (room) {
+          return roomToLeave.roomID != roomToLeave.roomID;
+        });
+      }
+      socket.leave(roomToLeave.roomID);
+  } 
+}
 
 function addRoomsToData(data) {
-  console.log("~Inside addRoomsToData~");
+  console.log("FXN: addRoomsToData")
   //data means the new player's socket id.
 
   // filter down to only rooms that can accept a new player
@@ -253,6 +218,7 @@ function addRoomsToData(data) {
 }
 
 function generateRoom() {
+  console.log("FXN: generateRoom")
   let room = {
     id: uuid.v4(), //possible screw up?
     p1: { username: null, id: null },
@@ -261,15 +227,3 @@ function generateRoom() {
   // room.id = uuid.v4();
   return room;
 }
-
-// if (
-//   io.nsps["/"].adapter.rooms["room-" + roomno] &&
-//   io.nsps["/"].adapter.rooms["room-" + roomno].length > 1
-// )
-//   roomno++;
-// socket.join("room-" + roomno);
-
-// //Send this event to everyone in the room.
-// io.sockets
-//   .in("room-" + roomno)
-//   .emit("connectToRoom", "You are in room no. " + roomno);
