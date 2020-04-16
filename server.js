@@ -56,6 +56,14 @@ io.on("connection", function (socket) {
     }
   });
 
+  socket.on("playerChangesLetter", function (data) {
+    const { index, character } = data;
+    socket.broadcast.emit("opponentUpdates", {
+      character: character,
+      index: index,
+    });
+  });
+
   socket.on("worm word submitted", function (wormWord) {
     validateWord(wormWord)
       .then((res) => {
