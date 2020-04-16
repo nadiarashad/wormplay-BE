@@ -97,7 +97,15 @@ io.on("connection", function (socket) {
           });
         }
       });
-    // Some p1 points vs p2 points to show who wins?? (probably separate function/event - send to client - when both scores present send both back to compare ?)
+  });
+
+  socket.on("make new game request", function (opponentInfo) {
+    socket.broadcast.emit("new game request", opponentInfo);
+  });
+
+  socket.on("new game", function () {
+    socket.emit("start new game");
+    socket.broadcast.emit("start new game");
   });
 
   socket.on("disconnect", () => {
