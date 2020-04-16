@@ -125,7 +125,7 @@ io.on("connection", function (socket) {
           });
         }
       });
-    // Some p1 points vs p2 points to show who wins?? (probably separate function/event)
+    // Some p1 points vs p2 points to show who wins?? (probably separate function/event - send to client - when both scores present send both back to compare ?)
   });
 
   socket.on("disconnect", () => {
