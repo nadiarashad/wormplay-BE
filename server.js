@@ -86,8 +86,19 @@ io.on("connection", function (socket) {
       });
   });
 
+  socket.on("playerChangesLetter", function (data) {
+    const { index, character } = data;
+    socket.broadcast.emit("opponentUpdates", {
+      character: character,
+      index: index,
+    });
+  });
+
   socket.on("worm word submitted", function (wormWord) {
+
     console.log("Worm Word Received: ", wormWord);
+
+
     validateWord(wormWord)
       .then((res) => {
         io.to(socket.id).emit("word checked", {
@@ -98,7 +109,7 @@ io.on("connection", function (socket) {
         socket.broadcast.emit("opponent score", {
           word: wormWord,
           isValid: true,
-          opponentPoints: wormWord.length,
+          points: wormWord.length,
         });
       })
       .catch((error) => {
@@ -111,7 +122,7 @@ io.on("connection", function (socket) {
           socket.broadcast.emit("opponent score", {
             word: wormWord,
             isValid: false,
-            opponentPoints: 0,
+            points: 0,
           });
         } else {
           io.to(socket.id).emit("api error", {
