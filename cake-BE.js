@@ -8,6 +8,8 @@ display sad worm and say Sorry!
 3. joinRoom
 send {roomID: qE2}
 
+4. roomJoined
+
 
 
 
@@ -114,7 +116,7 @@ send {roomID: qE2}
       var data = {};
 
       // add room info to message
-      addRoomsToData(data);
+      addRoomsToData(data);x
 
       // send message to user
       socket.emit("updatedRoomList", data);
