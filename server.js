@@ -89,7 +89,10 @@ io.on("connection", function (socket) {
 
   socket.on("joinRoom", function (data) {
     console.log(">>>joinRoom");
-    let roomID = data.roomID;
+    console.log(data, "joinroomdata");
+    const roomIdToNumber = Number(data.roomID);
+    console.log(roomIdToNumber, "tonumber");
+    let roomID = roomIdToNumber;
 
     //HERE'S WHAT A ROOM LOOKS LIKE:
     // room = {
@@ -184,7 +187,6 @@ io.on("connection", function (socket) {
           });
         }
       });
-
   });
 
   socket.on("make new game request", function (opponentInfo) {
