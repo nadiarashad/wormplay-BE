@@ -2,6 +2,7 @@ const utils = require("./utils/utils.js");
 const express = require("express");
 const _ = require("lodash");
 const app = express();
+const cors = require("cors");
 
 let shallILimitRoomParticipants = true;
 
@@ -20,6 +21,7 @@ const socketIo = require("socket.io");
 const port = process.env.PORT || 4002;
 const index = require("./routes/index");
 
+app.use(cors());
 app.use(index);
 
 const server = http.createServer(app);
