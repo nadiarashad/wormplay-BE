@@ -1,36 +1,18 @@
 const utils = require("./utils/utils.js");
 const express = require("express");
-const uuid = require("uuid");
 const _ = require("lodash");
 const app = express();
 let rooms = utils.egRooms; // There are deliberately no rooms with ID multiple of ten. They get added  by users creating news rooms. ~Chris
-
-const findFirstGapOrReturnNext = (object) => {
-  for (let i = 1; i <= Object.keys(object).length + 1; i++) {
-    if (!object[i]) {
-      return i;
-    }
-  }
-};
-
-const adjObj = [
-  "Wormy",
-  "Vermicular",
-  "Long and winding",
-  "Pink",
-  "Earthy",
-  "'Flatworm favourite'",
-  "Wiggly",
-  "Extra wiggly",
-  "Slithering",
-  "Coiled and relaxing",
-];
+const {
+  validateWord,
+  findFirstGapOrReturnNext,
+  adjObj,
+} = require("./utils/utils");
 
 let players = [];
 
 const http = require("http");
 const socketIo = require("socket.io");
-const { validateWord } = require("./utils/utils");
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
@@ -49,78 +31,17 @@ io.on("connection", function (socket) {
 
   socket.on("login", function (loginData) {
     console.log(">>>login");
-    // let lobbyData = {};
-    // addRoomsToData(lobbyData);
 
     const newPlayer = {};
     newPlayer.id = socket.id;
     newPlayer.username = loginData.username;
     players.push(newPlayer);
 
-    console.log("gonna do CNX REP");
-
-    rooms.forEach((room) => {
-      room.roomName = room.roomName
-        ? room.roomName
-        : `${adjObj[Math.floor(Math.random() * 10)]} room ${room.roomID}`;
-    });
-
     socket.emit("connectionReply", { rooms });
-    // socket.emit("connectionReply", lobbyData);
   });
 
-  socket.on("joinRoom", function (data) {
-    console.log(">>>joinRoom");
-    let roomID = data.roomID;
-
-    //HERE'S WHAT A ROOM LOOKS LIKE:
-    // room = {
-    //   roomID: uuid.v4(), //possible screw point
-    //   p1: { username: null, id: null },
-    //   p2: { username: null, id: null },
-    // };
-
-    let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
-
-    //******************UNCOMMENT OUT AFTER DEVAELOPEMTN */
-    // if (
-    //   !roomSheWantsToJoin ||
-    //   (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id)
-    // ) {
-    //   console.log("gonna refuse connection");
-    //   socket.emit("connectionRefused");
-    //   return;
-    // }
-
-    //Otherwise, yes, player can enter that room she wants.
-    let player = _.find(players, { id: socket.id });
-    let whichPlayerIsShe;
-
-    if (roomSheWantsToJoin.p1.id === null) {
-      roomSheWantsToJoin.p1 = player;
-      whichPlayerIsShe = "p1";
-    } else {
-      roomSheWantsToJoin.p2 = player;
-      whichPlayerIsShe = "p2";
-    }
-    console.log(
-      `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
-    );
-    socket.join(roomID);
-
-    socket.broadcast.to(roomID).emit("a player entered the game", {
-      room: roomSheWantsToJoin,
-      playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
-      enteringPlayerID: socket.id,
-      enteringPlayerUsername: player.username,
-    });
-
-    io.to(socket.id).emit("youJoinedARoom", {
-      youCanEnter: true,
-      playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
-      room: roomSheWantsToJoin,
-      whichPlayerIsShe,
-    });
+  socket.on("joinRoom", (data) => {
+    makePlayerJoinRoom(data, socket);
   });
 
   socket.on("playerChangesLetter", function (data) {
@@ -182,6 +103,14 @@ io.on("connection", function (socket) {
     makePlayerLeaveRoom(socket);
   });
 
+  socket.on("create room", (data) => {
+    console.log(`>>>create room`);
+    let newRoomID = findFirstGapOrReturnNext(rooms);
+    let newRoom = generateRoom(newRoomID, data.roomName);
+    rooms.push(newRoom);
+    makePlayerJoinRoom({ roomID: newRoom.roomID }, socket);
+  });
+
   socket.on("quitRoom", () => {
     console.log(`>>>quitRoom ${socket.id}`);
     makePlayerLeaveRoom(socket);
@@ -193,11 +122,8 @@ io.on("connection", function (socket) {
   });
 });
 
-//possible screw point should all these fxn declarations these be higher up??
-
 function makePlayerLeaveRoom(socket) {
   console.log("FXN: makePlayerLeaveRoom");
-
   let roomToLeaveArray = rooms.filter(
     (room) => room.p1.id === socket.id || room.p2.id === socket.id
   );
@@ -228,39 +154,61 @@ function makePlayerLeaveRoom(socket) {
   }
 }
 
-// function addRoomsToData(data) {
-//   console.log("FXN: addRoomsToData");
+function makePlayerJoinRoom(data, socket) {
+  console.log(">>>joinRoom");
+  let roomID = data.roomID;
 
-//   // filter down to only rooms that can accept a new player
-//   let availableRooms = _.filter(rooms, function (room) {
-//     return !(room.p1.id && room.p2.id);
-//   });
-//   // console.log("availableRooms" + availableRooms);
-//   // if no rooms are available, create a new room
-//   if (availableRooms.length === 0) {
-//     let newRoom = generateRoom();
-//     rooms.push(newRoom);
-//     availableRooms.push(newRoom);
-//   }
-//   // console.log("availableRooms" + availableRooms);
-//   data.rooms = _.map(availableRooms, function (room, index) {
-//     return {
-//       roomID: room.roomID,
-//       roomIndex: index + 1,
-//       playerCount: [room.p1.id, room.p2.id].filter((id) => id !== null).length,
-//     };
-//   });
-//   // console.log("data.rooms" + data.rooms);
-//   data.totalRooms = rooms.length;
-// }
+  let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
 
-function generateRoom() {
+  if (
+    !roomSheWantsToJoin ||
+    (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id)
+  ) {
+    console.log("gonna refuse connection");
+    socket.emit("connectionRefused");
+    return;
+  }
+
+  //Otherwise, yes, player can enter that room she wants.
+  let player = _.find(players, { id: socket.id });
+  let whichPlayerIsShe;
+
+  if (roomSheWantsToJoin.p1.id === null) {
+    roomSheWantsToJoin.p1 = player;
+    whichPlayerIsShe = "p1";
+  } else {
+    roomSheWantsToJoin.p2 = player;
+    whichPlayerIsShe = "p2";
+  }
+  console.log(
+    `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
+  );
+  socket.join(roomID);
+
+  socket.broadcast.to(roomID).emit("a player entered the game", {
+    room: roomSheWantsToJoin,
+    playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
+    enteringPlayerID: socket.id,
+    enteringPlayerUsername: player.username,
+  });
+
+  io.to(socket.id).emit("youJoinedARoom", {
+    youCanEnter: true,
+    playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
+    room: roomSheWantsToJoin,
+    whichPlayerIsShe,
+  });
+}
+
+function generateRoom(roomID, roomName) {
   console.log("FXN: generateRoom");
   let room = {
-    id: uuid.v4(), //possible screw up?
+    roomID,
+    roomName:
+      roomName ||
+      `${adjObj[Math.floor(Math.random() * 10)]} room ${room.roomID}`,
     p1: { username: null, id: null },
     p2: { username: null, id: null },
   };
-  // room.id = uuid.v4();
   return room;
 }

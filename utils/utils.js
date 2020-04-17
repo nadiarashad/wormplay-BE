@@ -9,6 +9,15 @@ const validateWord = (wormWord) => {
   );
 };
 
+const findFirstGapOrReturnNext = (arr) => {
+  let arrayOfIDS = arr.map((room) => room.roomID);
+  for (let i = 1; i <= arrayOfIDS.length + 1; i++) {
+    if (!arrayOfIDS.includes(i)) {
+      return i;
+    }
+  }
+};
+
 const egRooms = [
   {
     roomName: "Newton",
@@ -282,4 +291,17 @@ const egRooms = [
   },
 ];
 
-module.exports = { validateWord, egRooms };
+const adjObj = [
+  "Wormy",
+  "Vermicular",
+  "Long and winding",
+  "Pink",
+  "Earthy",
+  "'Flatworm favourite'",
+  "Wiggly",
+  "Extra wiggly",
+  "Slithering",
+  "Coiled and relaxing",
+];
+
+module.exports = { validateWord, egRooms, findFirstGapOrReturnNext, adjObj };
