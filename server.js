@@ -2,6 +2,9 @@ const utils = require("./utils/utils.js");
 const express = require("express");
 const _ = require("lodash");
 const app = express();
+
+let shallILimitRoomParticipants = true;
+
 let rooms = utils.egRooms; // There are deliberately no rooms with ID multiple of ten. They get added  by users creating news rooms. ~Chris
 const {
   validateWord,
@@ -123,6 +126,7 @@ io.on("connection", function (socket) {
 });
 
 function makePlayerLeaveRoom(socket) {
+  console.log(rooms[0]);
   console.log("FXN: makePlayerLeaveRoom");
   let roomToLeaveArray = rooms.filter(
     (room) => room.p1.id === socket.id || room.p2.id === socket.id
@@ -136,7 +140,7 @@ function makePlayerLeaveRoom(socket) {
     let roomToLeave = roomToLeaveArray[0];
 
     let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2";
-    roomToLeave[playerLabel].id = { username: null, id: null };
+    roomToLeave[playerLabel] = { username: null, id: null };
 
     socket.broadcast.to(roomToLeave.roomID).emit("a player left the game", {
       playersDetails: { p1: roomToLeave.p1, p2: roomToLeave.p2 },
@@ -144,25 +148,29 @@ function makePlayerLeaveRoom(socket) {
       leavingPlayerUsername: roomToLeave[playerLabel].username,
     });
 
-    // if the room is now empty, remove it from the room list
-    if (!roomToLeave.p1.id && !roomToLeave.p2.id) {
-      rooms = _.filter(rooms, function (room) {
-        return room.roomID != roomToLeave.roomID;
-      });
-    }
+    // *********** If the room is now empty, remove it from the room list
+    // if (!roomToLeave.p1.id && !roomToLeave.p2.id) {
+    //   rooms = _.filter(rooms, function (room) {
+    //     return room.roomID != roomToLeave.roomID;
+    //   });
+    // }
+
     socket.leave(roomToLeave.roomID);
   }
+  console.log(rooms[0]);
 }
 
 function makePlayerJoinRoom(data, socket) {
   console.log(">>>joinRoom");
+  console.log(rooms[0]);
   let roomID = data.roomID;
 
   let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
 
   if (
-    !roomSheWantsToJoin ||
-    (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id)
+    shallILimitRoomParticipants &&
+    (!roomSheWantsToJoin ||
+      (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id))
   ) {
     console.log("gonna refuse connection");
     socket.emit("connectionRefused");
@@ -198,6 +206,7 @@ function makePlayerJoinRoom(data, socket) {
     room: roomSheWantsToJoin,
     whichPlayerIsShe,
   });
+  console.log(rooms[0]);
 }
 
 function generateRoom(roomID, roomName) {
