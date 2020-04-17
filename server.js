@@ -28,14 +28,14 @@ let rooms = [
   {
     roomName: "",
     roomID: 1,
-    p1: { username: "benny", id: 12345 },
+    p1: { username: null, id: null },
     p2: { username: null, id: null },
   },
   {
     roomName: "",
     roomID: 2,
     p1: { username: null, id: null },
-    p2: { username: "linda", id: 6789 },
+    p2: { username: null, id: null },
   },
   {
     roomName: "",
@@ -142,10 +142,9 @@ io.on("connection", function (socket) {
   });
 
   socket.on("playerChangesLetter", function (data) {
-    const { index, character } = data;
+    const { array } = data;
     socket.broadcast.emit("opponentUpdates", {
-      character: character,
-      index: index,
+      array: array,
     });
   });
 
@@ -184,7 +183,6 @@ io.on("connection", function (socket) {
           });
         }
       });
-
   });
 
   socket.on("make new game request", function (opponentInfo) {
