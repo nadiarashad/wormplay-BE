@@ -2,7 +2,48 @@ const express = require("express");
 const uuid = require("uuid");
 const _ = require("lodash");
 const app = express();
-let rooms = [];
+
+const findFirstGapOrReturnNext = (object) => {
+  for (let i = 1; i <= Object.keys(object).length + 1; i++) {
+    if (!object[i]) {
+      return i;
+    }
+  }
+};
+
+const adjObj = [
+  "Wormy",
+  "Vermicular",
+  "Long and winding",
+  "Pink",
+  "Earthy",
+  "'Flatworm favourite'",
+  "Wiggly",
+  "Extra wiggly",
+  "Slithering",
+  "Coiled and relaxing",
+];
+
+let rooms = [
+  {
+    roomName: "",
+    roomID: 1,
+    p1: { username: "benny", id: 12345 },
+    p2: { username: null, id: null },
+  },
+  {
+    roomName: "",
+    roomID: 2,
+    p1: { username: null, id: null },
+    p2: { username: "linda", id: 6789 },
+  },
+  {
+    roomName: "",
+    roomID: 3,
+    p1: { username: null, id: null },
+    p2: { username: null, id: null },
+  },
+];
 let players = [];
 
 const http = require("http");
@@ -26,14 +67,24 @@ io.on("connection", function (socket) {
 
   socket.on("login", function (loginData) {
     console.log(">>>login");
-    let lobbyData = {};
-    addRoomsToData(lobbyData); // add room info to message
-    socket.emit("connectionReply", lobbyData); // send message to user
+    // let lobbyData = {};
+    // addRoomsToData(lobbyData);
 
     const newPlayer = {};
     newPlayer.id = socket.id;
     newPlayer.username = loginData.username;
     players.push(newPlayer);
+
+    console.log("gonna do CNX REP");
+
+    rooms.forEach((room) => {
+      room.roomName = room.roomName
+        ? room.roomName
+        : `${adjObj[Math.floor(Math.random() * 10)]} room ${room.roomID}`;
+    });
+
+    socket.emit("connectionReply", { rooms });
+    // socket.emit("connectionReply", lobbyData);
   });
 
   socket.on("joinRoom", function (data) {
@@ -49,26 +100,33 @@ io.on("connection", function (socket) {
 
     let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
 
-    if (
-      !roomSheWantsToJoin ||
-      (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id)
-    ) {
-      socket.emit("connectionRefused");
-      return;
-    }
+    //******************UNCOMMENT OUT AFTER DEVAELOPEMTN */
+    // if (
+    //   !roomSheWantsToJoin ||
+    //   (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id)
+    // ) {
+    //   console.log("gonna refuse connection");
+    //   socket.emit("connectionRefused");
+    //   return;
+    // }
 
     //Otherwise, yes, player can enter that room she wants.
     let player = _.find(players, { id: socket.id });
+    let whichPlayerIsShe;
 
     if (roomSheWantsToJoin.p1.id === null) {
       roomSheWantsToJoin.p1 = player;
+      whichPlayerIsShe = "p1";
     } else {
       roomSheWantsToJoin.p2 = player;
+      whichPlayerIsShe = "p2";
     }
-
+    console.log(
+      `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
+    );
     socket.join(roomID);
 
-    socket.broadcast.emit("a player entered the game", {
+    socket.broadcast.to(roomID).emit("a player entered the game", {
       room: roomSheWantsToJoin,
       playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
       enteringPlayerID: socket.id,
@@ -79,6 +137,7 @@ io.on("connection", function (socket) {
       youCanEnter: true,
       playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
       room: roomSheWantsToJoin,
+      whichPlayerIsShe,
     });
   });
 
@@ -161,7 +220,7 @@ function makePlayerLeaveRoom(socket) {
     let roomToLeave = roomToLeaveArray[0];
 
     let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2";
-    room[playerLabel].id = { username: null, id: null };
+    roomToLeave[playerLabel].id = { username: null, id: null };
 
     socket.broadcast.to(roomToLeave.roomID).emit("a player left the game", {
       playersDetails: { p1: roomToLeave.p1, p2: roomToLeave.p2 },
@@ -172,51 +231,38 @@ function makePlayerLeaveRoom(socket) {
     // if the room is now empty, remove it from the room list
     if (!roomToLeave.p1.id && !roomToLeave.p2.id) {
       rooms = _.filter(rooms, function (room) {
-        return roomToLeave.roomID != roomToLeave.roomID;
+        return room.roomID != roomToLeave.roomID;
       });
     }
     socket.leave(roomToLeave.roomID);
   }
 }
 
-function addRoomsToData(data) {
-  console.log("FXN: addRoomsToData");
-  //data means the new player's socket id.
+// function addRoomsToData(data) {
+//   console.log("FXN: addRoomsToData");
 
-  // filter down to only rooms that can accept a new player
-  var availableRooms = _.filter(rooms, function (room) {
-    return room.playerIds.length < 2;
-  });
-
-  // if no rooms are available, create a new room
-  if (availableRooms.length == 0) {
-    var newRoom = generateRoom();
-    rooms.push(newRoom);
-    availableRooms.push(newRoom);
-  }
-
-  // convert available rooms to just room id and player count and attach to data message
-  data.rooms = _.map(availableRooms, function (room, index) {
-    return {
-      roomId: room.id,
-      roomIndex: index + 1,
-      playerCount: room.playerIds.length,
-    };
-  });
-
-  // attach total number of rooms to data message
-  data.totalRooms = rooms.length;
-  // data = {totalRooms: 100}
-
-  // map-reduce to get total number of players in game
-  // and attach to message
-  var roomCounts = _.map(rooms, function (room) {
-    return room.playerIds.length;
-  });
-  data.playersInRooms = _.reduce(roomCounts, function (sum, count) {
-    return sum + count;
-  });
-}
+//   // filter down to only rooms that can accept a new player
+//   let availableRooms = _.filter(rooms, function (room) {
+//     return !(room.p1.id && room.p2.id);
+//   });
+//   // console.log("availableRooms" + availableRooms);
+//   // if no rooms are available, create a new room
+//   if (availableRooms.length === 0) {
+//     let newRoom = generateRoom();
+//     rooms.push(newRoom);
+//     availableRooms.push(newRoom);
+//   }
+//   // console.log("availableRooms" + availableRooms);
+//   data.rooms = _.map(availableRooms, function (room, index) {
+//     return {
+//       roomID: room.roomID,
+//       roomIndex: index + 1,
+//       playerCount: [room.p1.id, room.p2.id].filter((id) => id !== null).length,
+//     };
+//   });
+//   // console.log("data.rooms" + data.rooms);
+//   data.totalRooms = rooms.length;
+// }
 
 function generateRoom() {
   console.log("FXN: generateRoom");
