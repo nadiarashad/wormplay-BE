@@ -26,6 +26,28 @@ const adjObj = [
   "Coiled and relaxing",
 ];
 
+
+let rooms = [
+  {
+    roomName: "",
+    roomID: 1,
+    p1: { username: null, id: null },
+    p2: { username: null, id: null },
+  },
+  {
+    roomName: "",
+    roomID: 2,
+    p1: { username: null, id: null },
+    p2: { username: null, id: null },
+  },
+  {
+    roomName: "",
+    roomID: 3,
+    p1: { username: null, id: null },
+    p2: { username: null, id: null },
+  },
+];
+
 let players = [];
 
 const http = require("http");
@@ -127,10 +149,9 @@ io.on("connection", function (socket) {
   });
 
   socket.on("playerChangesLetter", function (data) {
-    const { index, character } = data;
+    const { array } = data;
     socket.broadcast.emit("opponentUpdates", {
-      character: character,
-      index: index,
+      array: array,
     });
   });
 
