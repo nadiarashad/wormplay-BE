@@ -55,8 +55,6 @@ io.on("connection", function (socket) {
   });
 
   socket.on("worm word submitted", function (wormWord) {
-    console.log("Worm Word Received: ", wormWord);
-
     validateWord(wormWord)
       .then((res) => {
         io.to(socket.id).emit("word checked", {
@@ -89,6 +87,11 @@ io.on("connection", function (socket) {
           });
         }
       });
+  });
+
+  socket.on("update rounds", function (roundsWon) {
+    socket.emit("set new rounds", roundsWon);
+    socket.broadcast.emit("set new rounds", roundsWon);
   });
 
   socket.on("make new game request", function (opponentInfo) {
