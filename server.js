@@ -12,28 +12,6 @@ const {
   adjObj,
 } = require("./utils/utils");
 
-
-let rooms = [
-  {
-    roomName: "",
-    roomID: 1,
-    p1: { username: null, id: null },
-    p2: { username: null, id: null },
-  },
-  {
-    roomName: "",
-    roomID: 2,
-    p1: { username: null, id: null },
-    p2: { username: null, id: null },
-  },
-  {
-    roomName: "",
-    roomID: 3,
-    p1: { username: null, id: null },
-    p2: { username: null, id: null },
-  },
-];
-
 let players = [];
 
 const http = require("http");
@@ -67,7 +45,6 @@ io.on("connection", function (socket) {
 
   socket.on("joinRoom", (data) => {
     makePlayerJoinRoom(data, socket);
-
   });
 
   socket.on("playerChangesLetter", function (data) {
@@ -185,10 +162,10 @@ function makePlayerLeaveRoom(socket) {
 function makePlayerJoinRoom(data, socket) {
   console.log(">>>joinRoom");
   console.log(rooms[0]);
-  let roomID = data.roomID;
+  let roomID = Number(data.roomID);
 
   let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
-
+  console.log("roomSheWantsToJoin", roomSheWantsToJoin);
   if (
     shallILimitRoomParticipants &&
     (!roomSheWantsToJoin ||
