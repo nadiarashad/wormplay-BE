@@ -1,7 +1,9 @@
+const utils = require("./utils/utils.js");
 const express = require("express");
 const uuid = require("uuid");
 const _ = require("lodash");
 const app = express();
+let rooms = utils.egRooms; // There are deliberately no rooms with ID multiple of ten. They get added  by users creating news rooms. ~Chris
 
 const findFirstGapOrReturnNext = (object) => {
   for (let i = 1; i <= Object.keys(object).length + 1; i++) {
@@ -24,6 +26,7 @@ const adjObj = [
   "Coiled and relaxing",
 ];
 
+
 let rooms = [
   {
     roomName: "",
@@ -44,6 +47,7 @@ let rooms = [
     p2: { username: null, id: null },
   },
 ];
+
 let players = [];
 
 const http = require("http");
@@ -89,7 +93,10 @@ io.on("connection", function (socket) {
 
   socket.on("joinRoom", function (data) {
     console.log(">>>joinRoom");
-    let roomID = data.roomID;
+    console.log(data, "joinroomdata");
+    const roomIdToNumber = Number(data.roomID);
+    console.log(roomIdToNumber, "tonumber");
+    let roomID = roomIdToNumber;
 
     //HERE'S WHAT A ROOM LOOKS LIKE:
     // room = {
