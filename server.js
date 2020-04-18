@@ -18,7 +18,7 @@ let players = [];
 const http = require("http");
 const socketIo = require("socket.io");
 
-const port = process.env.PORT || 4002;
+const port = process.env.PORT || 4003;
 const index = require("./routes/index");
 
 app.use(cors());
@@ -98,6 +98,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("new game", function () {
+    console.log("new game");
     socket.emit("start new game");
     socket.broadcast.emit("start new game");
   });
@@ -108,7 +109,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("create room", (data) => {
-    console.log(`>>>create room`);
+    console.log(`>>>create room`, data);
     let newRoomID = findFirstGapOrReturnNext(rooms);
     let newRoom = generateRoom(newRoomID, data.roomName);
     rooms.push(newRoom);
@@ -127,7 +128,7 @@ io.on("connection", function (socket) {
 });
 
 function makePlayerLeaveRoom(socket) {
-  console.log(rooms[0]);
+  // console.log(rooms[0]);
   console.log("FXN: makePlayerLeaveRoom");
   let roomToLeaveArray = rooms.filter(
     (room) => room.p1.id === socket.id || room.p2.id === socket.id
@@ -138,6 +139,7 @@ function makePlayerLeaveRoom(socket) {
       "A strange error where a player is disconnected from a room that the rooms array in BE doesn't think they're in, or there are multiple such rooms."
     );
   } else {
+    console.log("in the leaveroom else statement");
     let roomToLeave = roomToLeaveArray[0];
 
     let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2";
@@ -158,12 +160,13 @@ function makePlayerLeaveRoom(socket) {
 
     socket.leave(roomToLeave.roomID);
   }
-  console.log(rooms[0]);
+  // console.log(rooms[0]);
 }
 
 function makePlayerJoinRoom(data, socket) {
-  console.log(">>>joinRoom");
-  console.log(rooms[0]);
+  console.log(">>>joinRoom", data, socket);
+  // console.log(rooms[0]);
+
   let roomID = Number(data.roomID);
 
   let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
@@ -192,7 +195,10 @@ function makePlayerJoinRoom(data, socket) {
   console.log(
     `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
   );
+
   socket.join(roomID);
+
+  console.log("I joined a room");
 
   socket.broadcast.to(roomID).emit("a player entered the game", {
     room: roomSheWantsToJoin,
@@ -200,6 +206,7 @@ function makePlayerJoinRoom(data, socket) {
     enteringPlayerID: socket.id,
     enteringPlayerUsername: player.username,
   });
+  console.log("a player enteredthe game ");
 
   io.to(socket.id).emit("youJoinedARoom", {
     youCanEnter: true,
@@ -207,11 +214,12 @@ function makePlayerJoinRoom(data, socket) {
     room: roomSheWantsToJoin,
     whichPlayerIsShe,
   });
-  console.log(rooms[0]);
+  console.log("finally joined the room");
 }
 
 function generateRoom(roomID, roomName) {
-  console.log("FXN: generateRoom");
+  console.log("FXN: generateRoom", roomID, roomName);
+
   let room = {
     roomID,
     roomName:
