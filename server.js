@@ -141,12 +141,15 @@ function makePlayerLeaveRoom(socket) {
     let roomToLeave = roomToLeaveArray[0];
 
     let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2";
+
+    let leavingPlayerUsername = roomToLeave[playerLabel].username;
+
     roomToLeave[playerLabel] = { username: null, id: null };
 
     socket.broadcast.to(roomToLeave.roomID).emit("a player left the game", {
-      playersDetails: { p1: roomToLeave.p1, p2: roomToLeave.p2 },
+      currentRoom: roomToLeave,
       leavingPlayerID: socket.id,
-      leavingPlayerUsername: roomToLeave[playerLabel].username,
+      leavingPlayerUsername,
     });
 
     // *********** If the room is now empty, remove it from the room list
@@ -205,8 +208,7 @@ function makePlayerJoinRoom(data, socket) {
   socket.join(roomID);
 
   socket.broadcast.to(roomID).emit("a player entered the game", {
-    room: roomSheWantsToJoin,
-    playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
+    currentRoom: roomSheWantsToJoin,
     enteringPlayerID: socket.id,
     enteringPlayerUsername: player.username,
   });
