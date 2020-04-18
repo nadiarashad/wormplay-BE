@@ -19,7 +19,7 @@ let players = [];
 const http = require("http");
 const socketIo = require("socket.io");
 
-const port = process.env.PORT || 4003;
+const port = process.env.PORT || 4002;
 const index = require("./routes/index");
 
 app.use(cors());
