@@ -11,6 +11,7 @@ const {
   validateWord,
   findFirstGapOrReturnNext,
   adjObj,
+  scrabblePoints,
 } = require("./utils/utils");
 
 let players = [];
@@ -61,15 +62,22 @@ io.on("connection", function (socket) {
 
     validateWord(wormWord)
       .then((res) => {
+        let scrabblePointsArray = wormWord
+          .split("")
+          .map((letter) => scrabblePoints[letter]);
+        let scrabblePointsTotal = scrabblePointsArray.reduce((a, b) => a + b);
+
         io.to(socket.id).emit("word checked", {
           word: wormWord,
           isValid: true,
-          points: wormWord.length,
+          points: scrabblePointsTotal,
+          pointsArray: scrabblePointsArray,
         });
         socket.broadcast.emit("opponent score", {
           word: wormWord,
           isValid: true,
-          points: wormWord.length,
+          points: scrabblePointsTotal,
+          pointsArray: scrabblePointsArray,
         });
       })
       .catch((error) => {
