@@ -178,6 +178,16 @@ function makePlayerJoinRoom(data, socket) {
     return;
   }
 
+  if (data.developmentCheat) {
+    console.log("DEVELOPER CHEAT DETECTED");
+    const newPlayer = {};
+    newPlayer.id = socket.id;
+    newPlayer.username = `DEV TESTER${Math.floor(
+      Math.random().toFixed(4) * 10000
+    )}`;
+    players.push(newPlayer);
+  }
+
   //Otherwise, yes, player can enter that room she wants.
   let player = _.find(players, { id: socket.id });
   let whichPlayerIsShe;
@@ -199,6 +209,10 @@ function makePlayerJoinRoom(data, socket) {
     playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
     enteringPlayerID: socket.id,
     enteringPlayerUsername: player.username,
+  });
+
+  socket.broadcast.emit("lobbyUpdate", {
+    rooms,
   });
 
   io.to(socket.id).emit("youJoinedARoom", {
