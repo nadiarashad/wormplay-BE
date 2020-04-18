@@ -57,8 +57,6 @@ io.on("connection", function (socket) {
   });
 
   socket.on("worm word submitted", function (wormWord) {
-    console.log("Worm Word Received: ", wormWord);
-
     validateWord(wormWord)
       .then((res) => {
         io.to(socket.id).emit("word checked", {
@@ -91,6 +89,11 @@ io.on("connection", function (socket) {
           });
         }
       });
+  });
+
+  socket.on("update rounds", function (roundsWon) {
+    socket.emit("set new rounds", roundsWon);
+    socket.broadcast.emit("set new rounds", roundsWon);
   });
 
   socket.on("make new game request", function (opponentInfo) {
@@ -143,12 +146,15 @@ function makePlayerLeaveRoom(socket) {
     let roomToLeave = roomToLeaveArray[0];
 
     let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2";
+
+    let leavingPlayerUsername = roomToLeave[playerLabel].username;
+
     roomToLeave[playerLabel] = { username: null, id: null };
 
     socket.broadcast.to(roomToLeave.roomID).emit("a player left the game", {
-      playersDetails: { p1: roomToLeave.p1, p2: roomToLeave.p2 },
+      currentRoom: roomToLeave,
       leavingPlayerID: socket.id,
-      leavingPlayerUsername: roomToLeave[playerLabel].username,
+      leavingPlayerUsername,
     });
 
     // *********** If the room is now empty, remove it from the room list
@@ -181,6 +187,16 @@ function makePlayerJoinRoom(data, socket) {
     return;
   }
 
+  if (data.developmentCheat) {
+    console.log("DEVELOPER CHEAT DETECTED");
+    const newPlayer = {};
+    newPlayer.id = socket.id;
+    newPlayer.username = `DEV TESTER${Math.floor(
+      Math.random().toFixed(4) * 10000
+    )}`;
+    players.push(newPlayer);
+  }
+
   //Otherwise, yes, player can enter that room she wants.
   let player = _.find(players, { id: socket.id });
   let whichPlayerIsShe;
@@ -201,12 +217,15 @@ function makePlayerJoinRoom(data, socket) {
   console.log("I joined a room");
 
   socket.broadcast.to(roomID).emit("a player entered the game", {
-    room: roomSheWantsToJoin,
-    playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
+    currentRoom: roomSheWantsToJoin,
     enteringPlayerID: socket.id,
     enteringPlayerUsername: player.username,
   });
   console.log("a player enteredthe game ");
+
+  socket.broadcast.emit("lobbyUpdate", {
+    rooms,
+  });
 
   io.to(socket.id).emit("youJoinedARoom", {
     youCanEnter: true,
