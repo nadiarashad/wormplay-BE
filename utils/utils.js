@@ -1,8 +1,8 @@
 const axios = require("axios").default;
 
 const validateWord = (wormWord) => {
-  const app_id = "2120a036";
-  const app_key = "e28e8200b4b17bfe1a3ac0bcf5a12eb9";
+  const app_id = "7a048765";
+  const app_key = "bd44c2c5c9da0802e26bb819cc7e597c";
   return axios.get(
     `https://od-api.oxforddictionaries.com:443/api/v2/entries/en/${wormWord}`,
     { headers: { Accept: "application/json", app_id, app_key } }
