@@ -143,8 +143,9 @@ io.on("connection", function (socket) {
   });
 
   socket.on("clientSentChat", function (data) {
+    data.chatTimestamp = Date.now();
     console.log(">>>clientSentChat");
-    socket.broadcast.to(data.roomID).emit("serverSentChat", data);
+    socket.in(data.roomID).emit("serverSentChat", data);
   });
 });
 
