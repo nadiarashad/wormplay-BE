@@ -49,7 +49,7 @@ const scrabblePoints = {
 
 const egRooms = [
   {
-    roomName: "Newton",
+    roomName: "Newtonville",
     roomID: 1,
     p1: { username: null, id: null },
     p2: { username: null, id: null },
@@ -57,26 +57,26 @@ const egRooms = [
   {
     roomName: "Wyldwood",
     roomID: 2,
-    p1: { username: "Marios", id: 1587113809608 },
+    p1: { username: "Marianne", id: 1587113809608 },
     p2: { username: "Jarred", id: 1587113809608 },
   },
   {
-    roomName: "Hewitt",
+    roomName: "Monja Libre",
     roomID: 3,
-    p1: { username: "Georgy", id: 1587113809608 },
+    p1: { username: "Georgia", id: 1587113809608 },
     p2: { username: null, id: null },
   },
   {
-    roomName: "Darrouzett",
+    roomName: "Rush Creek",
     roomID: 4,
     p1: { username: null, id: null },
     p2: { username: "Koden", id: 1587113809608 },
   },
   {
-    roomName: "Lake View",
+    roomName: "Lake Lola",
     roomID: 5,
     p1: { username: "Gerard", id: 1587113809608 },
-    p2: { username: "Atom", id: 1587113809608 },
+    p2: { username: "Alicia", id: 1587113809608 },
   },
   {
     roomName: "Fulton",
@@ -85,10 +85,10 @@ const egRooms = [
     p2: { username: "Chaitanya", id: 1587113809608 },
   },
   {
-    roomName: "Vinton",
+    roomName: "Vimtown",
     roomID: 7,
-    p1: { username: "Bobby", id: 1587113809608 },
-    p2: { username: "Kie", id: 1587113809608 },
+    p1: { username: "Bobbie", id: 1587113809608 },
+    p2: { username: "Caoimhe", id: 1587113809608 },
   },
   {
     roomName: "San Felipe",
@@ -97,19 +97,19 @@ const egRooms = [
     p2: { username: "Henry", id: 1587113809608 },
   },
   {
-    roomName: "Lampasas",
+    roomName: "Ronpasas",
     roomID: 9,
     p1: { username: "Ciar", id: 1587113809608 },
     p2: { username: "Blaire", id: 1587113809608 },
   },
   {
-    roomName: "Reno",
+    roomName: "Reno!",
     roomID: 11,
     p1: { username: "Uri", id: 1587113809608 },
-    p2: { username: "Johnson", id: 1587113809608 },
+    p2: { username: "Felicity", id: 1587113809608 },
   },
   {
-    roomName: "Lake Worth",
+    roomName: "Lake Aslam",
     roomID: 12,
     p1: { username: "Peiyan", id: 1587113809608 },
     p2: { username: "Moore", id: 1587113809608 },
@@ -154,7 +154,7 @@ const egRooms = [
     roomName: "Hilltop",
     roomID: 19,
     p1: { username: "Bjorn", id: 1587113809608 },
-    p2: { username: "Declyan", id: 1587113809608 },
+    p2: { username: "Judit", id: 1587113809608 },
   },
   {
     roomName: "Smithville",
@@ -166,7 +166,7 @@ const egRooms = [
     roomName: "Old River",
     roomID: 22,
     p1: { username: "Hcen", id: 1587113809608 },
-    p2: { username: "Bader", id: 1587113809608 },
+    p2: { username: "Evgenia", id: 1587113809608 },
   },
   {
     roomName: "Roaring Spring",
