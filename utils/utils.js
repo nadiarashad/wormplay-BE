@@ -322,15 +322,15 @@ const egRooms = [
 
 const adjObj = [
   "Wormy",
-  "Vermicular",
-  "Long and winding",
+  "Larval",
+  "Long",
   "Pink",
   "Earthy",
-  "'Flatworm favourite'",
+  "Flatworm's",
   "Wiggly",
-  "Extra wiggly",
-  "Slithering",
-  "Coiled and relaxing",
+  "Whippy",
+  "Slithery",
+  "Coiled",
 ];
 
 module.exports = {

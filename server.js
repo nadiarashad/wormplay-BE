@@ -37,13 +37,23 @@ io.on("connection", function (socket) {
 
   socket.on("login", function (loginData) {
     console.log(">>>login");
+    if (loginData.developmentCheat) {
+      console.log("DEVELOPER CHEAT DETECTED");
+      const newPlayer = {};
+      newPlayer.id = socket.id;
+      newPlayer.username = `DEV-TEST-${Math.floor(
+        Math.random().toFixed(4) * 10000
+      )}`;
+      players.push(newPlayer);
+      socket.emit("connectionReply", { rooms, myUsername: newPlayer.username });
+    }
 
     const newPlayer = {};
     newPlayer.id = socket.id;
     newPlayer.username = loginData.username;
     players.push(newPlayer);
 
-    socket.emit("connectionReply", { rooms });
+    socket.emit("connectionReply", { rooms, myUsername: newPlayer.username });
   });
 
   socket.on("joinRoom", (data) => {
@@ -139,7 +149,6 @@ io.on("connection", function (socket) {
 });
 
 function makePlayerLeaveRoom(socket) {
-  // console.log(rooms[0]);
   console.log("FXN: makePlayerLeaveRoom");
   let roomToLeaveArray = rooms.filter(
     (room) => room.p1.id === socket.id || room.p2.id === socket.id
@@ -150,7 +159,6 @@ function makePlayerLeaveRoom(socket) {
       "A strange error where a player is disconnected from a room that the rooms array in BE doesn't think they're in, or there are multiple such rooms."
     );
   } else {
-    console.log("in the leaveroom else statement");
     let roomToLeave = roomToLeaveArray[0];
 
     let playerLabel = roomToLeave.p1.id === socket.id ? "p1" : "p2";
@@ -159,27 +167,30 @@ function makePlayerLeaveRoom(socket) {
 
     roomToLeave[playerLabel] = { username: null, id: null };
 
-    socket.broadcast.to(roomToLeave.roomID).emit("a player left the game", {
+    socket.broadcast.to(roomToLeave.roomID).emit("a player left your game", {
       currentRoom: roomToLeave,
       leavingPlayerID: socket.id,
       leavingPlayerUsername,
     });
 
-    // *********** If the room is now empty, remove it from the room list
-    // if (!roomToLeave.p1.id && !roomToLeave.p2.id) {
-    //   rooms = _.filter(rooms, function (room) {
-    //     return room.roomID != roomToLeave.roomID;
-    //   });
-    // }
+    // *********** If the room is now empty, remove it from the room list.
+    //For development purposes I've disabled the removal of room 1 even if empty.
+    if (roomToLeave.roomID != 1 && !roomToLeave.p1.id && !roomToLeave.p2.id) {
+      rooms = _.filter(rooms, function (room) {
+        return room.roomID != roomToLeave.roomID;
+      });
+    }
+
+    socket.broadcast.emit("lobbyUpdate", {
+      rooms,
+    });
 
     socket.leave(roomToLeave.roomID);
   }
-  // console.log(rooms[0]);
 }
 
 function makePlayerJoinRoom(data, socket) {
   console.log(">>>joinRoom", data, socket);
-  // console.log(rooms[0]);
 
   let roomID = Number(data.roomID);
 
@@ -199,7 +210,7 @@ function makePlayerJoinRoom(data, socket) {
     console.log("DEVELOPER CHEAT DETECTED");
     const newPlayer = {};
     newPlayer.id = socket.id;
-    newPlayer.username = `DEV TESTER${Math.floor(
+    newPlayer.username = `DEV-TEST-${Math.floor(
       Math.random().toFixed(4) * 10000
     )}`;
     players.push(newPlayer);
@@ -222,14 +233,12 @@ function makePlayerJoinRoom(data, socket) {
 
   socket.join(roomID);
 
-  console.log("I joined a room");
-
-  socket.broadcast.to(roomID).emit("a player entered the game", {
+  socket.broadcast.to(roomID).emit("a player entered your game", {
     currentRoom: roomSheWantsToJoin,
     enteringPlayerID: socket.id,
     enteringPlayerUsername: player.username,
   });
-  console.log("a player enteredthe game ");
+  console.log("a player entered the game ");
 
   socket.broadcast.emit("lobbyUpdate", {
     rooms,
@@ -241,7 +250,6 @@ function makePlayerJoinRoom(data, socket) {
     room: roomSheWantsToJoin,
     whichPlayerIsShe,
   });
-  console.log("finally joined the room");
 }
 
 function generateRoom(roomID, roomName) {
@@ -250,8 +258,7 @@ function generateRoom(roomID, roomName) {
   let room = {
     roomID,
     roomName:
-      roomName ||
-      `${adjObj[Math.floor(Math.random() * 10)]} room ${room.roomID}`,
+      roomName || `${adjObj[Math.floor(Math.random() * 10)]} room ${roomID}`,
     p1: { username: null, id: null },
     p2: { username: null, id: null },
   };
