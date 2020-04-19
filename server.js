@@ -3,6 +3,7 @@ const express = require("express");
 const _ = require("lodash");
 const app = express();
 const cors = require("cors");
+const fs = require("fs");
 
 let shallILimitRoomParticipants = true;
 
@@ -34,6 +35,19 @@ server.listen(port, () => console.log(`Listening on port ${port}`));
 
 io.on("connection", function (socket) {
   console.log(`>>>connection ${socket.id}`);
+
+  // socket.on("send me image", function () {
+  //   fs.readFile(__dirname + "/blue.jpg", function (err, buf) {
+  //     // socket.emit('image', { image: true, buffer: buf });
+  //     console.log("gonna send", buf.toString("base64"));
+  //     socket.emit("image", { image: true, buffer: buf.toString("base64") });
+  //   });
+  // });
+
+  socket.on("my emotion set", function (data) {
+    socket.in(data.roomID).emit("opponent's emotion set", data);
+    // socket.emit("image", { image: true, buffer: data.buf });
+  });
 
   socket.on("login", function (loginData) {
     console.log(">>>login");
