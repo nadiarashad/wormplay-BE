@@ -163,13 +163,13 @@ const egRooms = [
     p2: { username: "Lorenzo", id: 1587113809608 },
   },
   {
-    roomName: "Old River-Winfree",
+    roomName: "Old River",
     roomID: 22,
     p1: { username: "Hcen", id: 1587113809608 },
     p2: { username: "Bader", id: 1587113809608 },
   },
   {
-    roomName: "Roaring Springs",
+    roomName: "Roaring Spring",
     roomID: 23,
     p1: { username: null, id: null },
     p2: { username: "Callan", id: 1587113809608 },
@@ -181,7 +181,7 @@ const egRooms = [
     p2: { username: "Jarno", id: 1587113809608 },
   },
   {
-    roomName: "Hill Country Village",
+    roomName: "Green Hill",
     roomID: 25,
     p1: { username: "Forbes", id: 1587113809608 },
     p2: { username: "Conlin", id: 1587113809608 },
@@ -211,13 +211,13 @@ const egRooms = [
     p2: { username: "McCaulley", id: 1587113809608 },
   },
   {
-    roomName: "Panorama Village",
+    roomName: "Panorama",
     roomID: 31,
     p1: { username: "Aayan", id: 1587113809608 },
     p2: { username: "Lucca", id: 1587113809608 },
   },
   {
-    roomName: "College Station",
+    roomName: "College",
     roomID: 32,
     p1: { username: "Laird", id: 1587113809608 },
     p2: { username: "Mason", id: 1587113809608 },
@@ -235,7 +235,7 @@ const egRooms = [
     p2: { username: null, id: null },
   },
   {
-    roomName: "Del Sol-Loma Linda",
+    roomName: "Del Sol",
     roomID: 35,
     p1: { username: "Jae", id: 1587113809608 },
     p2: { username: "Tibet", id: 1587113809608 },
@@ -253,7 +253,7 @@ const egRooms = [
     p2: { username: null, id: null },
   },
   {
-    roomName: "Arroyo Gardens-La Tina Ranch",
+    roomName: "Arroyo Garden",
     roomID: 38,
     p1: { username: "Dyllan", id: 1587113809608 },
     p2: { username: "Shayne", id: 1587113809608 },
@@ -265,7 +265,7 @@ const egRooms = [
     p2: { username: "Ayan", id: 1587113809608 },
   },
   {
-    roomName: "Fair Oaks Ranch",
+    roomName: "Fair Oaks",
     roomID: 41,
     p1: { username: "Nicolas", id: 1587113809608 },
     p2: { username: "Anay", id: 1587113809608 },
