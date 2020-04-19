@@ -67,6 +67,11 @@ io.on("connection", function (socket) {
     });
   });
 
+  socket.on("I submitted", function (data) {
+    socket.emit("You submitted");
+    socket.broadcast.emit("opponent submitted", data);
+  });
+
   socket.on("worm word submitted", function (wormWord) {
     validateWord(wormWord)
       .then((res) => {
