@@ -144,7 +144,9 @@ io.on("connection", function (socket) {
 
   socket.on("clientSentChat", function (data) {
     data.chatTimestamp = Date.now();
+    data.sendingPlayerID = socket.id;
     console.log(">>>clientSentChat");
+    socket.emit("serverSentChat", data);
     socket.in(data.roomID).emit("serverSentChat", data);
   });
 });
