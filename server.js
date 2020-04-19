@@ -141,6 +141,10 @@ io.on("connection", function (socket) {
   socket.on("disconnect", () => {
     console.log(`>>>disconnect ${socket.id}`);
     makePlayerLeaveRoom(socket);
+    console.log("removing player from BE data store");
+    players = _.filter(players, function (player) {
+      return player.id != socket.id;
+    });
   });
 
   socket.on("create room", (data) => {
