@@ -88,26 +88,29 @@ io.on("connection", function (socket) {
   });
 
   socket.on("worm word submitted", function (wormWord) {
-    validateWord(wormWord)
-      .then((res) => {
-        //****If this is a bogus short word that got approved by the API anyway, we reject it.*/
-        if (
-          wordWord.length < 3 &&
-          !validOneOrTwoLetterWords.includes(wormWord.toLowerCase())
-        ) {
-          io.to(socket.id).emit("word checked", {
-            word: wormWord,
-            isValid: false,
-            points: 0,
-          });
-          socket.broadcast.emit("opponent score", {
-            word: wormWord,
-            isValid: false,
-            points: 0,
-          });
-        } else {
-          //********************** */
+    console.log(wormWord);
 
+    //****If this is a bogus short word that got approved by the API anyway, we reject it.*/
+    if (
+      wormWord.length < 3 &&
+      !validOneOrTwoLetterWords.includes(wormWord.toLowerCase())
+    ) {
+      console.log("***");
+      io.to(socket.id).emit("word checked", {
+        word: wormWord,
+        isValid: false,
+        points: 0,
+        pointsArray: [0],
+      });
+      socket.broadcast.emit("opponent score", {
+        word: wormWord,
+        isValid: false,
+        points: 0,
+        pointsArray: [0],
+      });
+    } else {
+      validateWord(wormWord)
+        .then((res) => {
           let scrabblePointsArray = wormWord
             .split("")
             .map((letter) => scrabblePoints[letter]);
@@ -125,27 +128,28 @@ io.on("connection", function (socket) {
             points: scrabblePointsTotal,
             pointsArray: scrabblePointsArray,
           });
-        }
-      })
-      .catch((error) => {
-        if (error.response.status === 404) {
-          io.to(socket.id).emit("word checked", {
-            word: wormWord,
-            isValid: false,
-            points: 0,
-          });
-          socket.broadcast.emit("opponent score", {
-            word: wormWord,
-            isValid: false,
-            points: 0,
-          });
-        } else {
-          io.to(socket.id).emit("api error", {
-            status: error.response.status,
-            message: error.response.statusText,
-          });
-        }
-      });
+        })
+        .catch((error) => {
+          if (error.response.status === 404) {
+            io.to(socket.id).emit("word checked", {
+              word: wormWord,
+              isValid: false,
+              points: 0,
+            });
+            socket.broadcast.emit("opponent score", {
+              word: wormWord,
+              isValid: false,
+              points: 0,
+            });
+          } else {
+            io.to(socket.id).emit("api error", {
+              status: error.response.status,
+              message: error.response.statusText,
+            });
+          }
+        });
+    }
+    //********************** */
   });
 
   socket.on("update rounds", function (roundsWon) {
