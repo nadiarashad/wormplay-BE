@@ -138,9 +138,12 @@ io.on("connection", function (socket) {
   });
 
   socket.on("new game", function () {
-    console.log("new game");
     socket.emit("start new game");
     socket.broadcast.emit("start new game");
+  });
+
+  socket.on("both players ready", (data) => {
+    io.in(data.roomID).emit("start the game");
   });
 
   socket.on("disconnect", () => {
