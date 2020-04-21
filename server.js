@@ -76,6 +76,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("playerChangesLetter", function (data) {
+    console.log(data.array, "player changes letter");
     const { array } = data;
     socket.broadcast.emit("opponentUpdates", {
       array: array,
