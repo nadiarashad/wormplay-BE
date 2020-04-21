@@ -183,7 +183,10 @@ io.on("connection", function (socket) {
     let newRoomID = findFirstGapOrReturnNext(rooms);
     let newRoom = generateRoom(newRoomID, data.roomName);
     rooms.push(newRoom);
-    makePlayerJoinRoom({ roomID: newRoom.roomID }, socket);
+    makePlayerJoinRoom(
+      { roomID: newRoom.roomID, playerFacesToServer: data.playerFacesToServer },
+      socket
+    );
   });
 
   socket.on("quitRoom", () => {
@@ -273,6 +276,9 @@ function makePlayerJoinRoom(data, socket) {
 
     //Otherwise, yes, player can enter that room she wants.
     let player = _.find(players, { id: socket.id });
+
+    player.playerFaces = data.playerFacesToServer;
+
     let whichPlayerIsShe;
 
     if (roomSheWantsToJoin.p1.id === null) {
@@ -292,6 +298,7 @@ function makePlayerJoinRoom(data, socket) {
       currentRoom: roomSheWantsToJoin,
       enteringPlayerID: socket.id,
       enteringPlayerUsername: player.username,
+      enteringPlayer: player,
     });
     console.log("a player entered the game ");
 
