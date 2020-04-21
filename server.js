@@ -95,7 +95,6 @@ io.on("connection", function (socket) {
       wormWord.length < 3 &&
       !validOneOrTwoLetterWords.includes(wormWord.toLowerCase())
     ) {
-      console.log("***");
       io.to(socket.id).emit("word checked", {
         word: wormWord,
         isValid: false,
@@ -180,7 +179,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("create room", (data) => {
-    console.log(`>>>create room`, data);
+    console.log(`>>>create room`);
     let newRoomID = findFirstGapOrReturnNext(rooms);
     let newRoom = generateRoom(newRoomID, data.roomName);
     rooms.push(newRoom);
@@ -245,64 +244,68 @@ function makePlayerLeaveRoom(socket) {
 function makePlayerJoinRoom(data, socket) {
   console.log(">>>joinRoom", data, socket);
 
-  let roomID = Number(data.roomID);
-
-  let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
-  console.log("roomSheWantsToJoin", roomSheWantsToJoin);
   if (
-    shallILimitRoomParticipants &&
-    (!roomSheWantsToJoin ||
-      (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id))
+    !rooms.some((room) => room.p1.id === socket.id || room.p2.id === socket.id)
   ) {
-    console.log("gonna refuse connection");
-    socket.emit("connectionRefused");
-    return;
+    let roomID = Number(data.roomID);
+
+    let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
+    console.log("roomSheWantsToJoin", roomSheWantsToJoin);
+    if (
+      shallILimitRoomParticipants &&
+      (!roomSheWantsToJoin ||
+        (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id))
+    ) {
+      console.log("gonna refuse connection");
+      socket.emit("connectionRefused");
+      return;
+    }
+
+    if (data.developmentCheat) {
+      console.log("DEVELOPER CHEAT DETECTED");
+      const newPlayer = {};
+      newPlayer.id = socket.id;
+      newPlayer.username = `DEV-TEST-${Math.floor(
+        Math.random().toFixed(4) * 10000
+      )}`;
+      players.push(newPlayer);
+    }
+
+    //Otherwise, yes, player can enter that room she wants.
+    let player = _.find(players, { id: socket.id });
+    let whichPlayerIsShe;
+
+    if (roomSheWantsToJoin.p1.id === null) {
+      roomSheWantsToJoin.p1 = player;
+      whichPlayerIsShe = "p1";
+    } else {
+      roomSheWantsToJoin.p2 = player;
+      whichPlayerIsShe = "p2";
+    }
+    console.log(
+      `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
+    );
+
+    socket.join(roomID);
+
+    socket.broadcast.to(roomID).emit("a player entered your game", {
+      currentRoom: roomSheWantsToJoin,
+      enteringPlayerID: socket.id,
+      enteringPlayerUsername: player.username,
+    });
+    console.log("a player entered the game ");
+
+    socket.broadcast.emit("lobbyUpdate", {
+      rooms,
+    });
+
+    io.to(socket.id).emit("youJoinedARoom", {
+      youCanEnter: true,
+      playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
+      room: roomSheWantsToJoin,
+      whichPlayerIsShe,
+    });
   }
-
-  if (data.developmentCheat) {
-    console.log("DEVELOPER CHEAT DETECTED");
-    const newPlayer = {};
-    newPlayer.id = socket.id;
-    newPlayer.username = `DEV-TEST-${Math.floor(
-      Math.random().toFixed(4) * 10000
-    )}`;
-    players.push(newPlayer);
-  }
-
-  //Otherwise, yes, player can enter that room she wants.
-  let player = _.find(players, { id: socket.id });
-  let whichPlayerIsShe;
-
-  if (roomSheWantsToJoin.p1.id === null) {
-    roomSheWantsToJoin.p1 = player;
-    whichPlayerIsShe = "p1";
-  } else {
-    roomSheWantsToJoin.p2 = player;
-    whichPlayerIsShe = "p2";
-  }
-  console.log(
-    `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
-  );
-
-  socket.join(roomID);
-
-  socket.broadcast.to(roomID).emit("a player entered your game", {
-    currentRoom: roomSheWantsToJoin,
-    enteringPlayerID: socket.id,
-    enteringPlayerUsername: player.username,
-  });
-  console.log("a player entered the game ");
-
-  socket.broadcast.emit("lobbyUpdate", {
-    rooms,
-  });
-
-  io.to(socket.id).emit("youJoinedARoom", {
-    youCanEnter: true,
-    playersDetails: { p1: roomSheWantsToJoin.p1, p2: roomSheWantsToJoin.p2 },
-    room: roomSheWantsToJoin,
-    whichPlayerIsShe,
-  });
 }
 
 function generateRoom(roomID, roomName) {
