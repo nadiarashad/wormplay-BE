@@ -163,7 +163,6 @@ io.on("connection", function (socket) {
   });
 
   socket.on("new game", function (roomID) {
-    console.log(roomID);
     io.in(roomID).emit("start new game");
   });
 
