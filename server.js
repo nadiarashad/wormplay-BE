@@ -157,13 +157,14 @@ io.on("connection", function (socket) {
     io.in(roomID).emit("set new rounds", roundsWon);
   });
 
-  socket.on("make new game request", function (opponentInfo) {
-    socket.broadcast.emit("new game request", opponentInfo);
+  socket.on("make new game request", function (data) {
+    const { name, player, roomID } = data;
+    socket.to(roomID).emit("new game request", { name, player });
   });
 
-  socket.on("new game", function () {
-    socket.emit("start new game");
-    socket.broadcast.emit("start new game");
+  socket.on("new game", function (roomID) {
+    console.log(roomID);
+    io.in(roomID).emit("start new game");
   });
 
   socket.on("both players ready", (data) => {
