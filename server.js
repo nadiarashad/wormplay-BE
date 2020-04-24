@@ -76,8 +76,8 @@ io.on("connection", function (socket) {
   });
 
   socket.on("playerChangesLetter", function (data) {
-    const { array } = data;
-    socket.broadcast.emit("opponentUpdates", {
+    const { array, roomID } = data;
+    socket.to(roomID).emit("opponentUpdates", {
       array: array,
     });
   });
