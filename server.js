@@ -76,19 +76,19 @@ io.on("connection", function (socket) {
   });
 
   socket.on("playerChangesLetter", function (data) {
-    const { array } = data;
-    socket.broadcast.emit("opponentUpdates", {
+    const { array, roomID } = data;
+    socket.to(roomID).emit("opponentUpdates", {
       array: array,
     });
   });
 
   socket.on("I submitted", function (data) {
     socket.emit("You submitted");
-    socket.broadcast.emit("opponent submitted", data);
+    socket.to(data.roomID).emit("opponent submitted", data);
   });
 
-  socket.on("worm word submitted", function (wormWord) {
-    console.log(wormWord);
+  socket.on("worm word submitted", function (data) {
+    const wormWord = data.submittedWord;
 
     //****If this is a bogus short word that got approved by the API anyway, we reject it.*/
     if (
@@ -101,7 +101,7 @@ io.on("connection", function (socket) {
         points: 0,
         pointsArray: [0],
       });
-      socket.broadcast.emit("opponent score", {
+      socket.to(data.roomID).emit("opponent score", {
         word: wormWord,
         isValid: false,
         points: 0,
@@ -121,7 +121,7 @@ io.on("connection", function (socket) {
             points: scrabblePointsTotal,
             pointsArray: scrabblePointsArray,
           });
-          socket.broadcast.emit("opponent score", {
+          socket.to(data.roomID).emit("opponent score", {
             word: wormWord,
             isValid: true,
             points: scrabblePointsTotal,
@@ -135,7 +135,7 @@ io.on("connection", function (socket) {
               isValid: false,
               points: 0,
             });
-            socket.broadcast.emit("opponent score", {
+            socket.to(data.roomID).emit("opponent score", {
               word: wormWord,
               isValid: false,
               points: 0,
@@ -151,18 +151,19 @@ io.on("connection", function (socket) {
     //********************** */
   });
 
-  socket.on("update rounds", function (roundsWon) {
-    socket.emit("set new rounds", roundsWon);
-    socket.broadcast.emit("set new rounds", roundsWon);
+  socket.on("update rounds", function (data) {
+    const { roundsWon, roomID } = data;
+    console.log(roundsWon, roomID);
+    io.in(roomID).emit("set new rounds", roundsWon);
   });
 
-  socket.on("make new game request", function (opponentInfo) {
-    socket.broadcast.emit("new game request", opponentInfo);
+  socket.on("make new game request", function (data) {
+    const { name, player, roomID } = data;
+    socket.to(roomID).emit("new game request", { name, player });
   });
 
-  socket.on("new game", function () {
-    socket.emit("start new game");
-    socket.broadcast.emit("start new game");
+  socket.on("new game", function (roomID) {
+    io.in(roomID).emit("start new game");
   });
 
   socket.on("both players ready", (data) => {
