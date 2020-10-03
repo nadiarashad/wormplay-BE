@@ -1,5 +1,38 @@
 # Wormplay backend
 
+## Description
+
+An online two-player word game that uses webcam for facial recognition. Upon entering the lobby, players can pull faces to represent four different emotions at their webcam, and the emotion recognition API detects which emotion is being expressed, and takes a photo at the correct moment. These photos of the player's own face are transferred onto the 'word worm' - a 2D physics object that crawls around the screen, onto which the player drops Scrabble tiles to spell out words and get points against their opponent.
+
+The game provides:
+
+- A login and lobby system to find other users online to play against
+  - React
+- An in-game chatroom
+  - Socket.IO
+- A webcam feature with facial and emotion recognition
+  - Facial recognition API
+- A 2D physics game
+  - Phaser
+- Realtime connections to allow both players to see each other's in-game action instantly
+  - Backend server using Express and Socket.IO
+- Checking of valid words during gameplay
+  - Oxford English Dictionary API
+
+This was the final project at the [Northcoders](https://northcoders.com/) coding bootcamp, and was thought of, designed, developed, and tested all within two weeks. The project started just at the beginning of the Covid-19 lockdown in the UK, and so the team of four collaborated entirely remotely, using Trello as a kanban board, daily standups, and Agile method throughout.
+
+## The Team
+
+[James Johnson](https://github.com/Brork)
+<br/>
+[Patrick Mackridge](https://github.com/PatrickMackridge)
+<br/>
+[Chris Matus](https://github.com/chicorycolumn)
+<br/>
+[Nadia Rashad](https://github.com/nadiarashad)
+
+The team's presentation can be found [here](https://www.youtube.com/watch?v=NdILlpRjQAg).
+
 ## Instructions
 
 This backend is live on [Heroku](https://wormplayserver.herokuapp.com/).
@@ -41,21 +74,3 @@ General instructions for hosting on **Heroku** for **automatic deployment** are 
 3. Login to Heroku and enable automatic deploys from Github, and connect the repo.
 
 Now when you commit and push to Github, Heroku will deploy the latest version of the project automatically.
-
-## Description
-
-An online two-player word game that uses webcam for facial recognition. Upon entering the lobby, players can pull faces to represent four different emotions at their webcam, and the emotion recognition API detects which emotion is being expressed, and takes a photo at the correct moment. These photos of the player's own face are transferred onto the 'word worm' - a 2D physics object that crawls around the screen - onto which the player drops Scrabble tiles to spell out words and get points against their opponent, who is doing the same.
-
-This was the final project at Northcoders, and was thought of, designed, developed, and tested all within two weeks. The project started just at the beginning of the Covid-19 lockdown in the UK, and so the team of four collaborated entirely remotely, using Trello as a kanban board, daily standups, and Agile method throughout.
-
-## The Team
-
-[James Johnson](https://github.com/Brork)
-<br/>
-[Patrick Mackridge](https://github.com/PatrickMackridge)
-<br/>
-[Chris Matus](https://github.com/chicorycolumn)
-<br/>
-[Nadia Rashad](https://github.com/nadiarashad)
-
-The team's presentation can be found [here](https://www.youtube.com/watch?v=NdILlpRjQAg).
