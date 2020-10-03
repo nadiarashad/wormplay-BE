@@ -7,7 +7,7 @@ const fs = require("fs");
 
 let shallILimitRoomParticipants = true;
 
-let rooms = utils.egRooms; // There are deliberately no rooms with ID multiple of ten. They get added  by users creating news rooms. ~Chris
+let rooms = utils.egRooms;
 const {
   validateWord,
   findFirstGapOrReturnNext,
@@ -35,25 +35,12 @@ const labelArray = ["p1", "p2"];
 server.listen(port, () => console.log(`Listening on port ${port}`));
 
 io.on("connection", function (socket) {
-  console.log(`>>>connection ${socket.id}`);
-
-  // socket.on("send me image", function () {
-  //   fs.readFile(__dirname + "/blue.jpg", function (err, buf) {
-  //     // socket.emit('image', { image: true, buffer: buf });
-  //     console.log("gonna send", buf.toString("base64"));
-  //     socket.emit("image", { image: true, buffer: buf.toString("base64") });
-  //   });
-  // });
-
   socket.on("my emotion set", function (data) {
     socket.in(data.roomID).emit("opponent's emotion set", data);
-    // socket.emit("image", { image: true, buffer: data.buf });
   });
 
   socket.on("login", function (loginData) {
-    console.log(">>>login");
     if (loginData.developmentCheat) {
-      console.log("DEVELOPER CHEAT DETECTED");
       const newPlayer = {};
       newPlayer.id = socket.id;
       newPlayer.username = `DEV-TEST-${Math.floor(
@@ -89,8 +76,6 @@ io.on("connection", function (socket) {
 
   socket.on("worm word submitted", function (data) {
     const wormWord = data.submittedWord;
-
-    //****If this is a bogus short word that got approved by the API anyway, we reject it.*/
     if (
       wormWord.length < 3 &&
       !validOneOrTwoLetterWords.includes(wormWord.toLowerCase())
@@ -148,12 +133,10 @@ io.on("connection", function (socket) {
           }
         });
     }
-    //********************** */
   });
 
   socket.on("update rounds", function (data) {
     const { roundsWon, roomID } = data;
-    console.log(roundsWon, roomID);
     io.in(roomID).emit("set new rounds", roundsWon);
   });
 
@@ -171,16 +154,13 @@ io.on("connection", function (socket) {
   });
 
   socket.on("disconnect", () => {
-    console.log(`>>>disconnect ${socket.id}`);
     makePlayerLeaveRoom(socket);
-    console.log("removing player from BE data store");
     players = _.filter(players, function (player) {
       return player.id != socket.id;
     });
   });
 
   socket.on("create room", (data) => {
-    console.log(`>>>create room`);
     let newRoomID = findFirstGapOrReturnNext(rooms);
     let newRoom = generateRoom(newRoomID, data.roomName);
     rooms.push(newRoom);
@@ -191,29 +171,23 @@ io.on("connection", function (socket) {
   });
 
   socket.on("quitRoom", () => {
-    console.log(`>>>quitRoom ${socket.id}`);
     makePlayerLeaveRoom(socket);
   });
 
   socket.on("clientSentChat", function (data) {
     data.chatTimestamp = Date.now();
     data.sendingPlayerID = socket.id;
-    console.log(">>>clientSentChat");
     socket.emit("serverSentChat", data);
     socket.in(data.roomID).emit("serverSentChat", data);
   });
 });
 
 function makePlayerLeaveRoom(socket) {
-  console.log("FXN: makePlayerLeaveRoom");
   let roomToLeaveArray = rooms.filter(
     (room) => room.p1.id === socket.id || room.p2.id === socket.id
   );
 
   if (roomToLeaveArray.length !== 1) {
-    console.log(
-      "A strange error where a player is disconnected from a room that the rooms array in BE doesn't think they're in, or there are multiple such rooms."
-    );
   } else {
     let roomToLeave = roomToLeaveArray[0];
 
@@ -229,8 +203,6 @@ function makePlayerLeaveRoom(socket) {
       leavingPlayerUsername,
     });
 
-    // *********** If the room is now empty, remove it from the room list.
-    //For development purposes I've disabled the removal of room 1 even if empty.
     if (roomToLeave.roomID != 1 && !roomToLeave.p1.id && !roomToLeave.p2.id) {
       rooms = _.filter(rooms, function (room) {
         return room.roomID != roomToLeave.roomID;
@@ -246,27 +218,22 @@ function makePlayerLeaveRoom(socket) {
 }
 
 function makePlayerJoinRoom(data, socket) {
-  console.log(">>>joinRoom", data, socket);
-
   if (
     !rooms.some((room) => room.p1.id === socket.id || room.p2.id === socket.id)
   ) {
     let roomID = Number(data.roomID);
 
-    let roomSheWantsToJoin = _.find(rooms, { roomID }); // find the room being requested
-    console.log("roomSheWantsToJoin", roomSheWantsToJoin);
+    let roomSheWantsToJoin = _.find(rooms, { roomID });
     if (
       shallILimitRoomParticipants &&
       (!roomSheWantsToJoin ||
         (roomSheWantsToJoin.p1.id && roomSheWantsToJoin.p2.id))
     ) {
-      console.log("gonna refuse connection");
       socket.emit("connectionRefused");
       return;
     }
 
     if (data.developmentCheat) {
-      console.log("DEVELOPER CHEAT DETECTED");
       const newPlayer = {};
       newPlayer.id = socket.id;
       newPlayer.username = `DEV-TEST-${Math.floor(
@@ -275,7 +242,6 @@ function makePlayerJoinRoom(data, socket) {
       players.push(newPlayer);
     }
 
-    //Otherwise, yes, player can enter that room she wants.
     let player = _.find(players, { id: socket.id });
 
     player.playerFaces = data.playerFacesToServer;
@@ -289,9 +255,6 @@ function makePlayerJoinRoom(data, socket) {
       roomSheWantsToJoin.p2 = player;
       whichPlayerIsShe = "p2";
     }
-    console.log(
-      `${player.username} is gonna join room ${roomSheWantsToJoin.roomID}`
-    );
 
     socket.join(roomID);
 
@@ -301,7 +264,6 @@ function makePlayerJoinRoom(data, socket) {
       enteringPlayerUsername: player.username,
       enteringPlayer: player,
     });
-    console.log("a player entered the game ");
 
     socket.broadcast.emit("lobbyUpdate", {
       rooms,
@@ -317,8 +279,6 @@ function makePlayerJoinRoom(data, socket) {
 }
 
 function generateRoom(roomID, roomName) {
-  console.log("FXN: generateRoom", roomID, roomName);
-
   let room = {
     roomID,
     roomName:
