@@ -2,24 +2,18 @@
 
 ## Description
 
-An online two-player word game that uses webcam for facial recognition. Upon entering the lobby, players can pull faces to represent four different emotions at their webcam, and the emotion recognition API detects which emotion is being expressed, and takes a photo at the correct moment. These photos of the player's own face are transferred onto the 'word worm' - a 2D physics object that crawls around the screen, onto which the player drops Scrabble tiles to spell out words and get points against their opponent.
+Wormplay is an online two-player word game that uses webcam for facial recognition. Upon entering the lobby, players can pull faces to represent four different emotions, and the emotion recognition API uses the webcam to detect which emotion is being expressed, and takes a photo at the correct moment. These photos of the player's own face are transferred onto the 'word worm' - a 2D physics object that crawls around the screen - onto which the player drops Scrabble tiles to spell out words and beat their opponent.
 
 The game provides:
 
-- A login and lobby system to find other users online to play against
-  - React
-- An in-game chatroom
-  - Socket.IO
-- A webcam feature with facial and emotion recognition
-  - Facial recognition API
-- A 2D physics game
-  - Phaser
-- Realtime connections to allow both players to see each other's in-game action instantly
-  - Backend server using Express and Socket.IO
-- Checking of valid words during gameplay
-  - Oxford English Dictionary API
+- A login and lobby system to find other users online to play against, built with React
+- An in-game chatroom , built with Socket.IO
+- A webcam feature with facial and emotion recognition, built with a facial recognition API
+- A 2D physics game, built with Phaser
+- Realtime connections to allow both players to see each other's in-game action instantly, via a backend server using Express and Socket.IO
+- Checking of valid words during gameplay, via the Oxford English Dictionary API
 
-This was the final project at the [Northcoders](https://northcoders.com/) coding bootcamp, and was thought of, designed, developed, and tested all within two weeks. The project started just at the beginning of the Covid-19 lockdown in the UK, and so the team of four collaborated entirely remotely, using Trello as a kanban board, daily standups, and Agile method throughout.
+This was the final project at [Northcoders](https://northcoders.com). It was thought of, designed, developed, and tested all within two weeks. The project started at the beginning of the Covid-19 UK lockdown in 2020, so the team of four collaborated entirely remotely.
 
 ## The Team
 
@@ -74,3 +68,22 @@ General instructions for hosting on **Heroku** for **automatic deployment** are 
 3. Login to Heroku and enable automatic deploys from Github, and connect the repo.
 
 Now when you commit and push to Github, Heroku will deploy the latest version of the project automatically.
+
+## Built with
+
+- [JavaScript](https://www.javascript.com/) - The primary coding language
+- [VisualStudioCode](https://code.visualstudio.com/) - The code editor
+- [Babel](https://babeljs.io/) - The compiler
+
+- [Heroku](https://www.heroku.com/) - The cloud application platform used for the backend
+- [Netlify](https://www.netlify.com/) - The hosting service used for the frontend
+
+- [Socket.IO](https://socket.io/) - The realtime library
+- [Axios](https://github.com/axios/axios) - The HTTP client
+- [Express](http://expressjs.com/) - The web application framework
+- [Lodash](https://lodash.com/) - The utility library
+
+- [Phaser](https://www.phaser.io/) - The game framework
+- [React](https://reactjs.org/) - The frontend framework
+- [TensorFlow](https://www.tensorflow.org/) - The library used by the facial recognition API
+- [CSS Modules](https://github.com/css-modules/css-modules) - The design organisation system
