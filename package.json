@@ -1,7 +1,7 @@
 {
-  "name": "womrnplay_backendserver",
+  "name": "Wormplay",
   "version": "1.0.0",
-  "description": "",
+  "description": "A worm-themed webcam wordgame with facial recognition",
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
@@ -9,13 +9,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nadiarashad/womrnplay_backendserver.git"
+    "url": "git+https://github.com/nadiarashad/wormplay-BE"
   },
   "keywords": [],
-  "author": "",
+  "author": "Nadia Rashad, Chris Matus, Patrick Mackridge, James Johnson",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nadiarashad/womrnplay_backendserver/issues"
+    "url": ""
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -25,5 +25,5 @@
     "nodemon": "^2.0.2",
     "socket.io": "^2.3.0"
   },
-  "homepage": "https://github.com/nadiarashad/womrnplay_backendserver#readme"
+  "homepage": "https://github.com/nadiarashad/wormplay-BE#readme"
 }
